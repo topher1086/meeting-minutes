@@ -1,0 +1,57 @@
+# Stage 1: Build Whisper.cpp
+FROM ubuntu:22.04 AS builder
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    libomp-dev \
+    llvm \
+    cmake \
+    clang
+
+# Set working directory
+WORKDIR /app
+
+# # Copy the build script and other necessary files
+# COPY . /app
+
+# Clone the repository - this is the key change
+RUN git clone https://github.com/topher1086/meeting-minutes.git /app
+
+# Update git submodules
+RUN git submodule update --init --recursive
+
+# Build Whisper.cpp
+WORKDIR /app/whisper.cpp
+RUN mkdir build && cd build
+RUN cmake ..
+RUN make -j$(nproc)
+
+# Stage 2: Create the final image
+FROM ubuntu:22.04
+
+# Install dependencies for the final image
+RUN apt-get update && apt-get install -y libomp-dev
+
+# Create the models directory in the persistent volume
+VOLUME /app/models
+
+# Copy the built binary and the run script
+COPY --from=builder /app/whisper.cpp/build/bin/whisper-server /app/
+COPY --from=builder /app/run-server.sh /app/
+COPY --from=builder /app/public /app/public
+COPY --from=builder /app/backend/temp.env /app/backend/.env
+COPY --from=builder /app/backend/clean_start_backend.sh /app/backend/
+
+WORKDIR /app
+
+# Download the model if it doesn't exist in the persistent volume
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# Expose the port
+EXPOSE 8178
+
+# Set the default command to run the server (can be overridden)
+CMD ["/app/whisper-server", "--model", "/app/models/ggml-small.bin", "--host", "0.0.0.0", "--port", "8178", "--diarize", "--print-progress"]
