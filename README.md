@@ -15,7 +15,9 @@
     </h3>
     <p align="center">
     <a href="https://meetily.zackriya.com"><b>Website</b></a> •
-    <a href="https://www.linkedin.com/in/sujithscom/"><b>Author</b></a>
+    <a href="https://in.linkedin.com/company/zackriya-solutions"><b>Author</b></a>
+    •
+    <a href="https://discord.gg/crRymMQBFH"><b>Discord Channel</b></a>
 </p>
     <p align="center">
     

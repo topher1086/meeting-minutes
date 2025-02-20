@@ -22,7 +22,7 @@ pub fn normalize_v2(audio: &[f32]) -> Vec<f32> {
     }
 
     // Increase target RMS for better voice volume while keeping peak in check
-    let target_rms = 0.5;  // Increased from 0.6
+    let target_rms = 0.9;  // Increased from 0.6
     let target_peak = 0.95; // Slightly reduced to prevent clipping
 
     let rms_scaling = target_rms / rms;
